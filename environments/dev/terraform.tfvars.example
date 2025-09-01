@@ -1,0 +1,50 @@
+﻿environment  = "dev"
+aws_region   = "us-east-2"
+
+snowflake_secret_arn         = ""
+snowflake_external_id        = ""
+snowflake_aws_principal_arn  = ""
+
+db_base_name = "ANALYTICS"
+
+alert_emails = ["alert@email.com"]
+
+pipelines = {
+  sales_possalesdaily = {
+    schema_name    = "SALES"
+    staging_schema = "SALES"
+    source_bucket  = "databucket"
+    source_prefix  = "possalesdaily/"
+    file_format    = { type = "CSV", delimiter = ",", skip_header = 1, field_optionally_enclosed_by = "\"", trim_space = true }
+    target_table   = "POS_SALES_DAILY"
+    staging_table  = "STG_POS_SALES_DAILY"
+    merge_keys     = ["DATE", "STORE_ID"] #Not currently used
+    cron_schedule = "0 5 * * 1 UTC"
+    on_error       = "ABORT_STATEMENT"
+    pattern         = ".*possalesdaily_.*\\.csv" #Not currently used
+
+    procedure_name  = "SP_COPY_MERGE_POS_SALES_DAILY"
+    procedure_lang  = "SQL"
+    procedure_file  = "../../modules/pipelines/procs/SP_COPY_MERGE_POS_SALES_DAILY.sql"
+  }
+
+
+    sales_positemsalesdaily = {
+    schema_name    = "SALES"
+    staging_schema = "SALES"
+    source_bucket  = "databucket"
+    source_prefix  = "positemsalesdaily/"
+    file_format    = { type = "CSV", delimiter = ",", skip_header = 1, field_optionally_enclosed_by = "\"", trim_space = true }
+    target_table   = "POS_ITEM_SALES_DAILY"
+    staging_table  = "STG_POS_ITEM_SALES_DAILY"
+    merge_keys     = ["DATE", "DAYPART", "STORE_ID"] #Not currently used
+    cron_schedule      = "0 5 * * 1 UTC"
+    on_error       = "ABORT_STATEMENT"
+    pattern         = ".*positemsalesdaily_.*\\.csv" #Not currently used
+
+    procedure_name  = "SP_COPY_MERGE_POS_ITEM_SALES_DAILY"
+    procedure_lang  = "SQL"
+    procedure_file  = "../../modules/pipelines/procs/SP_COPY_MERGE_POS_ITEM_SALES_DAILY.sql"
+  
+  }
+}
