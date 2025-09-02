@@ -18,6 +18,7 @@ module "infrastructure" {
   source      = "../../modules/infrastructure"
   environment = var.environment
   db_base_name = var.db_base_name
+  schemas = var.schemas
 }
 
 # Tables: build tables inside the DB created by Infrastructure

@@ -7,6 +7,8 @@ snowflake_aws_principal_arn  = ""
 
 db_base_name = "ANALYTICS"
 
+schemas = ["SALES", "MARKETING", "MASTER"]
+
 alert_emails = ["alert@email.com"]
 
 pipelines = {

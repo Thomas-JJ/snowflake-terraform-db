@@ -8,3 +8,7 @@ variable "db_base_name" {
   type        = string
 }
 
+variable "schemas" {
+  description = "list of schema names to be created"
+  type = list(string)
+}

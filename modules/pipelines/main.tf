@@ -91,6 +91,8 @@ resource "snowflake_file_format" "csv" {
   empty_field_as_null          = true
   null_if                      = ["", "NULL", "null"]
   parse_header                 = true
+
+  depends_on = [ snowflake_storage_integration.s3 ]
 }
 
 resource "snowflake_stage" "s3" {
@@ -102,9 +104,7 @@ resource "snowflake_stage" "s3" {
   url                 = "s3://${each.value.source_bucket}/${each.value.source_prefix}"
   storage_integration = snowflake_storage_integration.s3.name
 
-  depends_on = [
-    snowflake_file_format.csv
-  ]
+  depends_on = [ snowflake_file_format.csv ]
 }
 
 # SQL-language procedures

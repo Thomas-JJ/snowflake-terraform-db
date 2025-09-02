@@ -12,6 +12,11 @@ variable "alert_emails" {
 
 variable "db_base_name" { type = string }
 
+variable "schemas" {
+  type = list(string)
+}
+
+
 variable "pipelines" {
   type = map(object({
     schema_name    = string
