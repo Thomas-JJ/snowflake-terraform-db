@@ -1,6 +1,13 @@
 ﻿variable "environment"                { type = string }
 variable "aws_region"                  { type = string }
-variable "snowflake_secret_arn"        { type = string }
+
+variable "snowflake_account_name" { type = string}
+variable "snowflake_organization_name" { type = string}
+variable "snowflake_role" { type = string}
+variable "snowflake_user" { type = string}
+variable "snowflake_warehouse" { type = string }
+
+#variable "snowflake_secret_arn"        { type = string }
 
 variable "snowflake_external_id"       { type = string }
 variable "snowflake_aws_principal_arn" { type = string }
@@ -16,6 +23,40 @@ variable "schemas" {
   type = list(string)
 }
 
+variable "tables" {
+  type = map(object({
+    
+    table_name = string
+    schema_name = string
+    
+    fields = map(object({
+      
+      field_name = string
+      data_type = string
+      nullable = bool
+      comment = optional(string)
+      default_value = optional(string)
+      primary_key = bool
+
+    }))
+
+  }))
+
+  # ensure each table has at least one field
+  validation {
+    condition     = alltrue([for t in var.tables : length(t.fields) > 0])
+    error_message = "Each table must have at least one field."
+  }
+
+  # ensure each table has at least one key field
+  validation {
+    condition = alltrue([
+      for t in var.tables :
+      length([for f in t.fields : f if f.primary_key]) >= 1
+    ])
+    error_message = "Each table must define at least one key field."
+  }
+}
 
 variable "pipelines" {
   type = map(object({

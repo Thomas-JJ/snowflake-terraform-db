@@ -14,11 +14,17 @@ terraform {
 provider "aws" {}
 
 provider "snowflake" {
-  account_name      = local.snow.account
-  organization_name = local.snow.organization
-  user              = local.snow.username
-  password          = local.snow.password
-  role              = local.snow.role
-  warehouse         = local.snow.warehouse
-}
+  #account_name       = var.snowflake_account_name     # e.g. "xy12345" or "xy12345.us-east-1.aws"
+  #organization_name =  var.snowflake_organization_name
+  organization_name = "EHPQZCG"   # SELECT CURRENT_ORGANIZATION_NAME();
+  account_name      = "XCB81741"  # SELECT CURRENT_ACCOUNT_NAME();
 
+  user          = "ThomasJJ"              # your Snowflake service user
+  role          = var.snowflake_role
+  # optional, if you set them globally:
+
+  warehouse   = var.snowflake_warehouse
+
+  authenticator = "SNOWFLAKE_JWT"           # <- required for key-pair auth
+
+}

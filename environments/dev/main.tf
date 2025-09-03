@@ -1,13 +1,13 @@
 ﻿##########################################
 # Get Snowflake creds from AWS Secrets Manager
 ##########################################
-data "aws_secretsmanager_secret_version" "snowflake" {
-  secret_id = var.snowflake_secret_arn
-}
+#data "aws_secretsmanager_secret_version" "snowflake" {
+#  secret_id = var.snowflake_secret_arn
+#}
 
-locals {
-  snow = jsondecode(data.aws_secretsmanager_secret_version.snowflake.secret_string)
-}
+#locals {
+#  snow = jsondecode(data.aws_secretsmanager_secret_version.snowflake.secret_string)
+#}
 
 ######################################
 # Modules
@@ -27,8 +27,12 @@ module "tables" {
   database_name = module.infrastructure.database_name
   environment   = var.environment
 
+  tables = var.tables
+
   depends_on = [module.infrastructure]
 }
+
+
 
 # Pipelines: build stages, tasks, procs, etc.
 module "pipelines" {
@@ -36,8 +40,8 @@ module "pipelines" {
 
   environment                 = var.environment
   database_name               = module.infrastructure.database_name
-  warehouse                   = local.snow.warehouse      # value from secret, also exported as SNOWFLAKE_WAREHOUSE
-  snowflake_admin_role        = local.snow.role
+  warehouse                   = var.snowflake_warehouse
+  snowflake_admin_role        = var.snowflake_role
   snowflake_aws_principal_arn = var.snowflake_aws_principal_arn
   snowflake_external_id       = var.snowflake_external_id
 

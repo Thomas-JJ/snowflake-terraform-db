@@ -21,3 +21,5 @@ Thumbs.db
 *.pem
 *.key
 credentials.json
+*.p8
+*.pub
