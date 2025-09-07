@@ -121,11 +121,6 @@ resource "snowflake_procedure_sql" "proc_sql" {
   }
 
   arguments {
-    arg_name      = "ENV"
-    arg_data_type = "STRING"
-  }
-
-  arguments {
     arg_name      = "DB_NAME"
     arg_data_type = "STRING"
   }
@@ -140,11 +135,30 @@ resource "snowflake_procedure_sql" "proc_sql" {
     arg_data_type = "STRING"
   }
 
+  arguments {
+    arg_name      = "STAGE_NAME"
+    arg_data_type = "STRING"
+  }
+  
+  arguments {
+    arg_name      = "FILE_FORMAT_NAME"
+    arg_data_type = "STRING"
+  }
+
+  arguments {
+    arg_name      = "SPROC_NAME"
+    arg_data_type = "STRING"
+  }
+
   return_type = "VARCHAR"
   execute_as  = "OWNER"
 
   # Reference the SQL script file per pipeline
   procedure_definition = file(each.value.procedure_file)
+
+    depends_on = [
+    snowflake_file_format.csv
+  ]
 }
 
 
@@ -162,22 +176,25 @@ resource "snowflake_task" "copy_task" {
   }
 
   sql_statement = format(
-      "CALL %s.%s.%s('%s','%s','%s','%s','%s');",
+      "CALL %s.%s.%s('%s','%s','%s','%s','%s','%s','%s');",
     local.db_name,
     each.value.schema_name,
     each.value.procedure_name,
 
     ".*\\.csv",
-    local.env,
     local.db_name,
     each.value.schema_name,
-    each.value.target_table
+    each.value.target_table,
+    snowflake_stage.s3[each.key].name,               
+    snowflake_file_format.csv[each.key].name,
+    each.value.procedure_name
+  
 
   )
 
   started = true
   
   depends_on = [
-    snowflake_procedure_sql.proc_sql
+    snowflake_procedure_sql.proc_sql, snowflake_stage.s3
   ]
 }

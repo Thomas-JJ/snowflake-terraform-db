@@ -27,6 +27,8 @@ module "tables" {
   database_name = module.infrastructure.database_name
   environment   = var.environment
 
+  audit_columns =  var.audit_columns
+
   tables = var.tables
 
   depends_on = [module.infrastructure]

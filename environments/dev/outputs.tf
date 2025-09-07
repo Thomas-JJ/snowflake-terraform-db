@@ -5,11 +5,6 @@ output "database_info" {
   }
 }
 
-output "table_info" {
-  description = "Created table information"
-  value = module.tables.table_names
-}
-
 output "environment" {
   description = "Current environment"
   value = var.environment

@@ -7,8 +7,6 @@ variable "snowflake_role" { type = string}
 variable "snowflake_user" { type = string}
 variable "snowflake_warehouse" { type = string }
 
-#variable "snowflake_secret_arn"        { type = string }
-
 variable "snowflake_external_id"       { type = string }
 variable "snowflake_aws_principal_arn" { type = string }
 
@@ -23,12 +21,26 @@ variable "schemas" {
   type = list(string)
 }
 
+variable "audit_columns"{ 
+  type = list(object({
+      
+      field_name = string
+      data_type = string
+      nullable = bool
+      comment = optional(string)
+      default_value = optional(string)
+
+    }))
+}
+
+
 variable "tables" {
   type = map(object({
     
     table_name = string
     schema_name = string
-    
+    add_audit_columns = bool
+    add_stage_table = bool
     fields = map(object({
       
       field_name = string

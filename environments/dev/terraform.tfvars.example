@@ -1,52 +1,185 @@
 ﻿environment  = "dev"
 aws_region   = "us-east-2"
 
-snowflake_secret_arn         = ""
-snowflake_external_id        = ""
-snowflake_aws_principal_arn  = ""
+snowflake_account_name = "Accnt_Name"
+snowflake_organization_name = "Org_Name"
+snowflake_role = "ACCOUNTADMIN"
+snowflake_user = "User_Name"
+snowflake_warehouse = "COMPUTE_WH"
+
+
+snowflake_external_id        = "external_id"
+snowflake_aws_principal_arn  = "arn:aws:iam::principal_arn"
+
+alert_emails = ["alerts@email.com"]
 
 db_base_name = "ANALYTICS"
 
-schemas = ["SALES", "MARKETING", "MASTER"]
+schemas = ["SALES", "MARKETING", "MASTER", "UTILITIES"]
 
-alert_emails = ["alert@email.com"]
+audit_columns = [
+  {
+    field_name = "CREATED_AT"
+    data_type  = "TIMESTAMP_LTZ(9)"
+    nullable   = false
+    default    = "CURRENT_TIMESTAMP()"
+  },
+  {
+    field_name = "CREATED_BY"
+    data_type  = "VARCHAR"
+    nullable   = false
+    default    = "CURRENT_USER()"
+  },
+  {
+    field_name = "UPDATED_AT"
+    data_type  = "TIMESTAMP_LTZ(9)"
+    nullable   = true
+    default    = null
+  },
+  {
+    field_name = "UPDATED_BY"
+    data_type  = "VARCHAR"
+    nullable   = true
+    default    = null
+  }
+]
+
+
+tables = {
+  orders = {
+    table_name = "ORDERS"
+    schema_name = "SALES"
+    add_audit_columns = true
+    add_stage_table = false
+    fields = {
+      ORDER_ID = {
+        field_name    = "ORDER_ID"
+        data_type     = "NUMBER(38,0)"
+        nullable      = false
+        primary_key     = true
+      }
+      AMOUNT = {
+        field_name = "AMOUNT"
+        data_type  = "NUMBER(10,2)"
+        nullable   = true
+        comment    = "Order amount"
+        primary_key  = false
+      }
+      SRC_FILENAME = {
+        field_name = "SRC_FILENAME"
+        data_type  = "VARCHAR"
+        nullable   = true
+        default    = null
+        primary_key  = false
+      }
+
+      SRC_ROW_NUMBER = {
+        field_name = "SRC_ROW_NUMBER"
+        data_type  = "NUMBER(38,0)"
+        nullable   = true
+        default    = null
+        primary_key  = false
+      }
+
+      LOAD_ID = {
+        field_name = "LOAD_ID"
+        data_type  = "VARCHAR"
+        nullable   = true
+        default    = null
+        primary_key  = false
+      }
+
+    }
+  }
+
+  order_items = {
+    table_name = "ORDER_ITEMS"
+    schema_name = "SALES"
+    add_audit_columns = false
+    add_stage_table = false
+    fields = {
+      ORDER_ID = {
+        field_name    = "ORDER_ID"
+        data_type     = "NUMBER(38,0)"
+        nullable      = false
+        primary_key     = true
+      }
+      ITEM_ID = {
+        field_name    = "ITEM_ID"
+        data_type     = "NUMBER(38,0)"
+        nullable      = false
+        primary_key     = true
+      }
+      
+      AMOUNT = {
+        field_name = "AMOUNT"
+        data_type  = "NUMBER(10,2)"
+        nullable   = true
+        comment    = "Order amount"
+        primary_key  = false
+      }
+      SRC_FILENAME = {
+        field_name = "SRC_FILENAME"
+        data_type  = "VARCHAR"
+        nullable   = true
+        default    = null
+        primary_key  = false
+      }
+
+      SRC_ROW_NUMBER = {
+        field_name = "SRC_ROW_NUMBER"
+        data_type  = "NUMBER(38,0)"
+        nullable   = true
+        default    = null
+        primary_key  = false
+      }
+
+      LOAD_ID = {
+        field_name = "LOAD_ID"
+        data_type  = "VARCHAR"
+        nullable   = true
+        default    = null
+        primary_key  = false
+      }
+    }
+  }
+}
 
 pipelines = {
-  sales_possalesdaily = {
+  sales_order_items = {
     schema_name    = "SALES"
     staging_schema = "SALES"
-    source_bucket  = "databucket"
-    source_prefix  = "possalesdaily/"
+    source_bucket  = "alohadatafg"
+    source_prefix  = "orderitems/"
     file_format    = { type = "CSV", delimiter = ",", skip_header = 1, field_optionally_enclosed_by = "\"", trim_space = true }
-    target_table   = "POS_SALES_DAILY"
-    staging_table  = "STG_POS_SALES_DAILY"
-    merge_keys     = ["DATE", "STORE_ID"] #Not currently used
+    target_table   = "ORDER_ITEMS"
+    staging_table  = "STG_ORDER_ITEMS"
+    merge_keys     = ["ORDER_ID", "ITEM_ID"]
     cron_schedule = "0 5 * * 1 UTC"
     on_error       = "ABORT_STATEMENT"
-    pattern         = ".*possalesdaily_.*\\.csv" #Not currently used
+    pattern         = ".*orderitems_.*\\.csv"
 
-    procedure_name  = "SP_COPY_MERGE_POS_SALES_DAILY"
+    procedure_name  = "SP_COPY_MERGE_ORDER_ITEMS"
     procedure_lang  = "SQL"
-    procedure_file  = "../../modules/pipelines/procs/SP_COPY_MERGE_POS_SALES_DAILY.sql"
+    procedure_file  = "../../modules/pipelines/procs/SP_COPY_MERGE_ORDER_ITEMS.sql"
   }
 
-
-    sales_positemsalesdaily = {
+  sales_orders = {
     schema_name    = "SALES"
     staging_schema = "SALES"
-    source_bucket  = "databucket"
-    source_prefix  = "positemsalesdaily/"
+    source_bucket  = "alohadatafg"
+    source_prefix  = "orders/"
     file_format    = { type = "CSV", delimiter = ",", skip_header = 1, field_optionally_enclosed_by = "\"", trim_space = true }
-    target_table   = "POS_ITEM_SALES_DAILY"
-    staging_table  = "STG_POS_ITEM_SALES_DAILY"
-    merge_keys     = ["DATE", "DAYPART", "STORE_ID"] #Not currently used
-    cron_schedule      = "0 5 * * 1 UTC"
+    target_table   = "ORDERS"
+    staging_table  = "STG_ORDERS"
+    merge_keys     = ["ORDER_ID"]
+    cron_schedule = "0 5 * * 1 UTC"
     on_error       = "ABORT_STATEMENT"
-    pattern         = ".*positemsalesdaily_.*\\.csv" #Not currently used
+    pattern         = ".*orders_.*\\.csv"
 
-    procedure_name  = "SP_COPY_MERGE_POS_ITEM_SALES_DAILY"
+    procedure_name  = "SP_COPY_MERGE_ORDERS"
     procedure_lang  = "SQL"
-    procedure_file  = "../../modules/pipelines/procs/SP_COPY_MERGE_POS_ITEM_SALES_DAILY.sql"
-  
+    procedure_file  = "../../modules/pipelines/procs/SP_COPY_MERGE_ORDERS.sql"
   }
+
 }
