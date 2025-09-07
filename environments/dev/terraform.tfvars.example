@@ -46,6 +46,64 @@ audit_columns = [
 
 
 tables = {
+
+  load_audit = {
+    table_name = "LOAD_AUDIT"
+    schema_name = "UTILITIES"
+    add_audit_columns = false
+    add_stage_table = false
+    fields = {
+      ORDER_ID = {
+        field_name    = "LOAD_ID"
+        data_type     = "VARCHAR"
+        nullable      = false
+        primary_key     = true
+      }
+      started_at = {
+        field_name    = "STARTED_AT"
+        data_type     = "TIMESTAMP_LTZ(9)"
+        nullable      = true
+        primary_key     = false
+      }
+      finished_at = {
+        field_name    = "FINISHED_AT"
+        data_type     = "TIMESTAMP_LTZ(9)"
+        nullable      = true
+        primary_key     = false
+      }      
+      TABLE_NAME = {
+        field_name = "TABLE_NAME"
+        data_type  = "VARCHAR"
+        nullable   = true
+        primary_key  = false
+      }
+      FILES = {
+        field_name = "FILES"
+        data_type  = "VARIANT"
+        nullable   = true
+        primary_key  = false
+      }
+      ROWS_COPIED = {
+        field_name = "ROWS_COPIED"
+        data_type  = "NUMBER(10,0)"
+        nullable   = true
+        primary_key  = false
+      }
+      ROWS_MERGED = {
+        field_name = "ROWS_MERGED"
+        data_type  = "NUMBER(10,0)"
+        nullable   = true
+        primary_key  = false
+      }
+      STATUS = {
+        field_name = "STATUS"
+        data_type  = "VARCHAR"
+        nullable   = true
+        primary_key  = false
+      }
+    }
+  }
+
   orders = {
     table_name = "ORDERS"
     schema_name = "SALES"
