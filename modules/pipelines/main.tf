@@ -91,6 +91,8 @@ resource "snowflake_file_format" "csv" {
   empty_field_as_null          = true
   null_if                      = ["", "NULL", "null"]
   parse_header                 = true
+  date_format                  = coalesce(each.value.file_format.date_format, "YYYY-MM-DD")
+  skip_byte_order_mark         = true
 
   depends_on = [ snowflake_storage_integration.s3 ]
 }

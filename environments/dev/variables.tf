@@ -82,6 +82,7 @@ variable "pipelines" {
       skip_header                  = optional(number)
       field_optionally_enclosed_by = optional(string)
       trim_space                   = optional(bool)
+      date_format                  = optional(string)
     })
     target_table  = string
     staging_table = string

@@ -63,16 +63,16 @@ Define your data pipelines in `terraform.tfvars`:
 
 ```hcl
 pipelines = {
-  sales_possalesdaily = {
+  sales_orders = {
     schema_name     = "SALES"
     staging_schema  = "SALES"
     source_bucket   = "your-data-bucket"
-    source_prefix   = "possalesdaily/"
-    target_table    = "POS_SALES_DAILY"
-    staging_table   = "STG_POS_SALES_DAILY"
+    source_prefix   = "orders/"
+    target_table    = "ORDERS"
+    staging_table   = "STG_ORDERS"
     merge_keys      = ["DATE", "STORE_ID"]
     cron_schedule   = "0 5 * * 1 UTC"
-    pattern         = ".*possalesdaily_.*\\.csv"
+    pattern         = ".*orders_.*\\.csv"
     
     file_format = {
       type                         = "CSV"
@@ -82,8 +82,8 @@ pipelines = {
       trim_space                   = true
     }
     
-    procedure_name = "SP_COPY_MERGE_POS_SALES_DAILY"
-    procedure_file = "../../modules/pipelines/procs/SP_COPY_MERGE_POS_SALES_DAILY.sql"
+    procedure_name = "SP_COPY_MERGE_ORDERS"
+    procedure_file = "../../modules/pipelines/procs/SP_COPY_MERGE_ORDERS.sql"
   }
 }
 ```
@@ -151,7 +151,7 @@ Each data pipeline consists of four main components:
 ### 2. File Format
 - **Purpose**: Defines parsing rules for incoming files
 - **Supported Types**: CSV, JSON, Parquet, and other Snowflake-supported formats
-- **Customizable**: Delimiter, headers, encoding, and null handling options
+- **Customizable**: Delimiter, headers, encoding, date format, and null handling options
 
 ### 3. Stored Procedure
 - **Purpose**: Implements COPY INTO and MERGE logic for data processing
@@ -175,11 +175,11 @@ Each data pipeline consists of four main components:
 ### Processing Flow
 
 ```
-File: "possalesdaily/possalesdaily_20250126.csv"
+File: "orders/orders_20250126.csv"
 │
-├─ Task executes on schedule (0 5 * * 1 UTC)
-├─ COPY INTO STG_POS_SALES_DAILY from @external_stage
-├─ MERGE STG_POS_SALES_DAILY → POS_SALES_DAILY on [DATE, STORE_ID]
+├─ Task executes on Mondays at 5am UTC (0 5 * * 1 UTC) Customizable using CRON Expression
+├─ COPY INTO STG_ORDERS from @external_stage
+├─ MERGE STG_ORDERS → ORDERS on [DATE, STORE_ID]
 └─ Log results to task history ✅
 ```
 
@@ -299,7 +299,7 @@ WHERE NAME LIKE '%SALES%'
 ORDER BY SCHEDULED_TIME DESC;
 
 -- Test stored procedure manually
-CALL SP_COPY_MERGE_POS_SALES_DAILY();
+CALL SP_COPY_MERGE_ORDERS();
 
 -- Check stage file listing
 LIST @external_stage_name;

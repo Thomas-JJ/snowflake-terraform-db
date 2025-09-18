@@ -209,7 +209,7 @@ pipelines = {
     staging_schema = "SALES"
     source_bucket  = "alohadatafg"
     source_prefix  = "orderitems/"
-    file_format    = { type = "CSV", delimiter = ",", skip_header = 1, field_optionally_enclosed_by = "\"", trim_space = true }
+    file_format    = { type = "CSV", delimiter = ",", skip_header = 1, field_optionally_enclosed_by = "\"", trim_space = true, date_format = "MM-DD-YYYY" }
     target_table   = "ORDER_ITEMS"
     staging_table  = "STG_ORDER_ITEMS"
     merge_keys     = ["ORDER_ID", "ITEM_ID"]
@@ -227,7 +227,7 @@ pipelines = {
     staging_schema = "SALES"
     source_bucket  = "alohadatafg"
     source_prefix  = "orders/"
-    file_format    = { type = "CSV", delimiter = ",", skip_header = 1, field_optionally_enclosed_by = "\"", trim_space = true }
+    file_format    = { type = "CSV", delimiter = ",", skip_header = 1, field_optionally_enclosed_by = "\"", trim_space = true, date_format = "MM-DD-YYYY" }
     target_table   = "ORDERS"
     staging_table  = "STG_ORDERS"
     merge_keys     = ["ORDER_ID"]
