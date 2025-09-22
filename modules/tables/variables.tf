@@ -28,6 +28,7 @@ variable "tables" {
     schema_name = string
     add_audit_columns = bool
     add_stage_table = bool
+    change_tracking = bool
     
     fields = map(object({
       

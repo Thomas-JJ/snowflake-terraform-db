@@ -41,6 +41,7 @@ variable "tables" {
     schema_name = string
     add_audit_columns = bool
     add_stage_table = bool
+    change_tracking = bool
     fields = map(object({
       
       field_name = string
@@ -96,3 +97,17 @@ variable "pipelines" {
     procedure_file  = string                 # relative path to .sql (from this module)
   }))
 }
+variable "dynamic_tables" {
+  type = map(object({
+    table_name        = string
+    schema_name       = string
+    target_lag        = string
+    warehouse         = string
+    query             = string
+
+    initialize        = optional(string)
+    comment           = optional(string)       
+  }))
+}
+
+

@@ -50,9 +50,10 @@ locals {
   table_defs = {
     for tkey, t in var.tables :
     tkey => {
-      name    = t.table_name
-      schema  = t.schema_name
-      columns = local.columns_by_table[tkey]
+      name            = t.table_name
+      schema          = t.schema_name
+      columns         = local.columns_by_table[tkey]
+      change_tracking = t.change_tracking
       pk_cols = [for f in t.fields : f.field_name if try(f.primary_key, false)]
     }
   }
@@ -73,9 +74,10 @@ locals {
 resource "snowflake_table" "this" {
   for_each = local.table_defs
 
-  database = var.database_name
-  schema   = each.value.schema
-  name     = each.value.name
+  database        = var.database_name
+  schema          = each.value.schema
+  name            = each.value.name
+  change_tracking = each.value.change_tracking
 
   dynamic "column" {
     for_each = each.value.columns

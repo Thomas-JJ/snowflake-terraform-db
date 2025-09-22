@@ -52,6 +52,7 @@ tables = {
     schema_name = "UTILITIES"
     add_audit_columns = false
     add_stage_table = false
+    change_tracking = false
     fields = {
       ORDER_ID = {
         field_name    = "LOAD_ID"
@@ -109,12 +110,19 @@ tables = {
     schema_name = "SALES"
     add_audit_columns = true
     add_stage_table = false
+    change_tracking = true
     fields = {
       ORDER_ID = {
         field_name    = "ORDER_ID"
         data_type     = "NUMBER(38,0)"
         nullable      = false
         primary_key     = true
+      }
+      ORDER_DATE = {
+        field_name    = "ORDER_DATE"
+        data_type     = "DATE"
+        nullable      = true
+        primary_key     = false
       }
       AMOUNT = {
         field_name = "AMOUNT"
@@ -155,6 +163,7 @@ tables = {
     schema_name = "SALES"
     add_audit_columns = false
     add_stage_table = false
+    change_tracking = true
     fields = {
       ORDER_ID = {
         field_name    = "ORDER_ID"
@@ -204,30 +213,12 @@ tables = {
 }
 
 pipelines = {
-  sales_order_items = {
-    schema_name    = "SALES"
-    staging_schema = "SALES"
-    source_bucket  = "alohadatafg"
-    source_prefix  = "orderitems/"
-    file_format    = { type = "CSV", delimiter = ",", skip_header = 1, field_optionally_enclosed_by = "\"", trim_space = true, date_format = "MM-DD-YYYY" }
-    target_table   = "ORDER_ITEMS"
-    staging_table  = "STG_ORDER_ITEMS"
-    merge_keys     = ["ORDER_ID", "ITEM_ID"]
-    cron_schedule = "0 5 * * 1 UTC"
-    on_error       = "ABORT_STATEMENT"
-    pattern         = ".*orderitems_.*\\.csv"
-
-    procedure_name  = "SP_COPY_MERGE_ORDER_ITEMS"
-    procedure_lang  = "SQL"
-    procedure_file  = "../../modules/pipelines/procs/SP_COPY_MERGE_ORDER_ITEMS.sql"
-  }
-
   sales_orders = {
     schema_name    = "SALES"
     staging_schema = "SALES"
     source_bucket  = "alohadatafg"
     source_prefix  = "orders/"
-    file_format    = { type = "CSV", delimiter = ",", skip_header = 1, field_optionally_enclosed_by = "\"", trim_space = true, date_format = "MM-DD-YYYY" }
+    file_format    = { type = "CSV", delimiter = ",", skip_header = 1, field_optionally_enclosed_by = "\"", trim_space = true }
     target_table   = "ORDERS"
     staging_table  = "STG_ORDERS"
     merge_keys     = ["ORDER_ID"]
@@ -240,4 +231,19 @@ pipelines = {
     procedure_file  = "../../modules/pipelines/procs/SP_COPY_MERGE_ORDERS.sql"
   }
 
+}
+
+
+dynamic_tables = {
+  ORDERS_DAILY = {
+    table_name        = "ORDERS_DAILY"
+    schema_name       = "SALES"
+    target_lag        = "12 hours"
+    warehouse         = "COMPUTE_WH"
+
+    query             = "../../modules/dynamictables/queries/ORDERS_DAILY.sql"
+    initialize        = "ON_CREATE"
+
+    comment           = "Summarizes order activity by date"
+  }
 }

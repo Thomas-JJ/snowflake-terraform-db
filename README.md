@@ -9,11 +9,43 @@ This solution provides enterprise-grade data pipeline automation for Snowflake e
 ## Architecture
 
 ```
-AWS S3 Buckets → External Stages → Snowflake Tables
-     ↓               ↓                ↓
-Raw Data Files   Terraform-Managed   Structured Data
-                 Pipeline Automation
+AWS S3 Buckets  →  External Stages  →  Snowflake Tables (STG_*, Base Tables)
+     ↓                  ↓                       ↓
+ Raw Data Files   Terraform-Managed        Structured Data
+                  Pipeline Automation             ↓
+                                                  ↓
+                                            Snowflake Dynamic Tables
+                                                    ↓
+                                              Analytics / BI / Streamlit
 ```
+🔎 Flow Explanation
+
+AWS S3 Buckets
+Source systems deliver raw data files (CSV, Parquet, etc.) into S3 buckets. These are the entry point into the data platform.
+
+External Stages
+Snowflake external stages are provisioned via Terraform, pointing to the correct S3 prefixes. They allow Snowflake to securely and directly access the raw files.
+
+Snowflake Tables (STG + Base)
+
+Staging Tables (STG_): Mirror the raw file structure, enriched with audit columns.
+
+Base Tables: Merge, deduplicate, and enforce schema standards for long-term storage.
+All of these are defined in Terraform modules for reproducibility.
+
+Dynamic Tables
+Dynamic tables act as automated materializations. They continuously maintain rollups, joins, and aggregates based on the underlying base tables.
+
+Freshness is governed by TARGET_LAG (e.g., 5 minutes, 12 hours, or DOWNSTREAM).
+
+Perfect for creating curated data marts without writing complex orchestration logic.
+
+Analytics / BI / Streamlit
+Downstream applications (Power BI, Tableau, Streamlit) connect to the dynamic tables.
+
+These tables are optimized for consumption and always up to date within the defined lag.
+
+Your Streamlit app, for example, can directly update or query dynamic tables for interactive analysis.
 
 ## Features
 
@@ -126,6 +158,7 @@ file_format = {
   field_optionally_enclosed_by = "\""            # Quote character
   trim_space                   = true            # Remove whitespace
   null_if                     = ["", "NULL"]     # Null value representations
+  data_format                 = "MM-DD-YYYY"     # Specify format of date fields
 }
 ```
 
