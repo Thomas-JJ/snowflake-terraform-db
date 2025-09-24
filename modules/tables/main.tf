@@ -82,12 +82,12 @@ resource "snowflake_table" "this" {
   dynamic "column" {
     for_each = each.value.columns
     content {
-      name     = column.value.name
-      type     = column.value.type
-      nullable = column.value.nullable
-      comment  = column.value.comment
+    name     = column.value.name
+    type     = column.value.type
+    nullable = column.value.nullable
+    comment  = column.value.comment
 
-      dynamic "default" {
+    dynamic "default" {
         for_each = length(try(trimspace(tostring(column.value.default_value)), "")) > 0 ? [1] : []
         content {
           expression = trimspace(tostring(column.value.default_value))

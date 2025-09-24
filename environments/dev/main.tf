@@ -63,3 +63,18 @@ module "dynamic_tables" {
   dynamic_tables = var.dynamic_tables
   depends_on = [module.tables]
 }
+
+
+module "views" {
+  source = "../../modules/views"
+  database_name = module.infrastructure.database_name
+  views = var.views
+  depends_on = [module.tables]
+}
+
+module "shares" {
+  source = "../../modules/snowshares"
+  database_name = module.infrastructure.database_name
+  shares = var.shares
+  depends_on = [module.tables]
+}

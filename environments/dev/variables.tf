@@ -103,11 +103,25 @@ variable "dynamic_tables" {
     schema_name       = string
     target_lag        = string
     warehouse         = string
-    query             = string
+    query             = string            # relative path to .sql (from this module)
 
     initialize        = optional(string)
     comment           = optional(string)       
   }))
 }
 
+variable "views" {
+  type = map(object({
+    schema     = string
+    name       = string
+    is_secure  = optional(bool, true)  # setting to false allows accounts it is shared with to see the sql behind the view
+    query      = string               # relative path to .sql (from this module)
 
+  }))
+}
+variable "shares" {
+  type = map(object({
+    schema           = string
+    consumer_accounts = list(string)
+  }))
+}

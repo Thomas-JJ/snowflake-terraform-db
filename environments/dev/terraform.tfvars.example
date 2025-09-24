@@ -247,3 +247,26 @@ dynamic_tables = {
     comment           = "Summarizes order activity by date"
   }
 }
+
+views =  {
+  ORDERS_V_DETROIT = {
+    schema     = "SECURE_DETROIT"
+    name       = "ORDERS_V"
+    is_secure  = true
+    query      = "../../modules/views/queries/ORDERS_V_DETROIT.sql"
+  }
+  ORDERS_V_NASHVILLE = {
+    schema     = "SECURE_NASHVILLE"
+    name       = "ORDERS_V"
+    is_secure  = true
+    query      = "../../modules/views/queries/ORDERS_V_NASHVILLE.sql"
+  }
+}
+
+shares =  {
+  Detroit   = {
+      schema = "SECURE_DETROIT"
+      consumer_accounts = ["orgid.accountid"]
+  }
+}
+
