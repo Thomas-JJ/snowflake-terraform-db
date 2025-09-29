@@ -1,10 +1,10 @@
 ﻿environment  = "dev"
 aws_region   = "us-east-2"
 
-snowflake_account_name = "Accnt_Name"
-snowflake_organization_name = "Org_Name"
-snowflake_role = "ACCOUNTADMIN"
-snowflake_user = "User_Name"
+snowflake_account_name = "account_name"
+snowflake_organization_name = "organization_name"
+snowflake_role = "role"
+snowflake_user = "user"
 snowflake_warehouse = "COMPUTE_WH"
 
 
@@ -15,7 +15,7 @@ alert_emails = ["alerts@email.com"]
 
 db_base_name = "ANALYTICS"
 
-schemas = ["SALES", "MARKETING", "MASTER", "UTILITIES"]
+schemas = ["SALES", "MARKETING", "MASTER", "UTILITIES", "SECURE_DETROIT", "SECURE_NASHVILLE", "ML"]
 
 audit_columns = [
   {
@@ -118,6 +118,12 @@ tables = {
         nullable      = false
         primary_key     = true
       }
+      LOCATION = {
+        field_name    = "LOCATION"
+        data_type     = "VARCHAR"
+        nullable      = true
+        primary_key     = false
+      }
       ORDER_DATE = {
         field_name    = "ORDER_DATE"
         data_type     = "DATE"
@@ -210,6 +216,80 @@ tables = {
       }
     }
   }
+  holidays = {
+    table_name = "HOLIDAYS"
+    schema_name = "MASTER"
+    add_audit_columns = true
+    add_stage_table = false
+    change_tracking = true
+    fields = {
+      ID = {
+        field_name    = "ID"
+        data_type     = "INT"
+        nullable      = false
+        primary_key     = true
+      }
+
+      DATE = {
+        field_name    = "DATE"
+        data_type     = "DATE"
+        nullable      = false
+        primary_key     = false
+      }
+      HOLIDAY_NAME = {
+        field_name    = "HOLIDAY_NAME"
+        data_type     = "VARCHAR"
+        nullable      = false
+        primary_key     = false
+      }
+    }
+  }
+sales_forecast_results = {
+    table_name = "SALES_FORECAST_RESULT"
+    schema_name = "ML"
+    add_audit_columns = false
+    add_stage_table = false
+    change_tracking = true
+    fields = {
+      LOCATION = {
+        field_name    = "LOCATION"
+        data_type     = "VARCHAR"
+        nullable      = false
+        primary_key     = true
+      }
+      TIMESTAMP = {
+        field_name    = "TIMESTAMP"
+        data_type     = "DATE"
+        nullable      = false
+        primary_key     = true
+      }
+      PREDICTED = {
+        field_name    = "PREDICTED"
+        data_type     = "FLOAT"
+        nullable      = false
+        primary_key     = false
+      }
+      CI_LOW = {
+        field_name    = "CI_LOW"
+        data_type     = "FLOAT"
+        nullable      = false
+        primary_key     = false
+      }
+      CI_HIGH = {
+        field_name    = "CI_HIGH"
+        data_type     = "FLOAT"
+        nullable      = false
+        primary_key     = false
+      }
+      LOAD_ID = {
+        field_name    = "LOAD_ID"
+        data_type     = "VARCHAR"
+        nullable      = false
+        primary_key     = true
+      }
+    }
+  }
+
 }
 
 pipelines = {
@@ -248,6 +328,7 @@ dynamic_tables = {
   }
 }
 
+
 views =  {
   ORDERS_V_DETROIT = {
     schema     = "SECURE_DETROIT"
@@ -266,7 +347,24 @@ views =  {
 shares =  {
   Detroit   = {
       schema = "SECURE_DETROIT"
-      consumer_accounts = ["orgid.accountid"]
+      consumer_accounts = ["organizationid.accountid"]
   }
 }
 
+forecasts =  {
+  SALES_FORECAST = {
+    schema     = "ML"
+    fcast_sql      = "../../modules/forecasts/fcast-sql/SALES_FORECAST.sql"
+    
+    view = {
+      view_name = "SALES_FOR_FORECAST_V"
+      view_sql    = "../../modules/forecasts/view-sql/SALES_FOR_FORECAST_V.sql"
+    }
+    warehouse = "COMPUTE_WH"
+
+    horizon = 30
+
+    cron_schedule = "0 6 * * 1 UTC"
+    forecast_results_table = "SALES_FORECAST_RESULT"
+  }
+}

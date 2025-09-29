@@ -7,7 +7,7 @@ resource "snowflake_view" "this" {
 
   schema     = each.value.schema
   name       = each.value.name
-  is_secure  = lookup(each.value, "is_secure", true)
+  is_secure  = each.value.is_secure
 
   statement = file(each.value.query)
 }

@@ -72,9 +72,17 @@ module "views" {
   depends_on = [module.tables]
 }
 
-module "shares" {
-  source = "../../modules/snowshares"
+#module "shares" {
+ # source = "../../modules/snowshares"
+ # database_name = module.infrastructure.database_name
+#  shares = var.shares
+#  depends_on = [module.tables]
+#}
+
+module "forecasts" {
+  source = "../../modules/forecasts"
+  environment =  var.environment
   database_name = module.infrastructure.database_name
-  shares = var.shares
-  depends_on = [module.tables]
+  forecasts = var.forecasts
+  depends_on = [module.views]
 }
