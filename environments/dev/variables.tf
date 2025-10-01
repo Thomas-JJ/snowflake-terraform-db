@@ -129,14 +129,22 @@ variable "shares" {
 variable "forecasts" {
   type = map(object({
     schema     = string
+    
     fcast_sql      = string
-    view = object({
+    
+    historical_view = object({
         view_name     = string
         view_sql      = string
     })
-    warehouse     = string
-    horizon       = number
-    cron_schedule = string
+    
+    future_features_view = object({
+        view_name     = string
+        view_sql      = string
+    })
+    
+    warehouse                 = string
+    forecasting_periods       = number
+    cron_schedule             = string
 
     forecast_results_table = string
   

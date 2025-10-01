@@ -5,11 +5,24 @@ resource "snowflake_view" "this" {
   database   = var.database_name
 
   schema     = each.value.schema
-  name       = each.value.view.view_name
+  name       = each.value.historical_view.view_name
   is_secure  = true
 
-  statement = file(each.value.view.view_sql)
+  statement = file(each.value.historical_view.view_sql)
 }
+
+resource "snowflake_view" "that" {
+  for_each = var.forecasts
+
+  database   = var.database_name
+
+  schema     = each.value.schema
+  name       = each.value.future_features_view.view_name
+  is_secure  = true
+
+  statement = file(each.value.future_features_view.view_sql)
+}
+
 
 resource "snowflake_execute" "forecast" {
   for_each = var.forecasts
@@ -43,7 +56,8 @@ resource "snowflake_task" "copy_task" {
   }
 
   sql_statement = format(
-      "INSERT INTO %s.%s.%s SELECT * FROM TABLE(SNOWFLAKE.ML.FORECAST!PREDICT( FORECAST_NAME => '%s.%s.%s', HORIZON => %s));",
+    "INSERT INTO %s.%s.%s (SERIES, TS, FORECAST, LOWER_BOUND, UPPER_BOUND, LOAD_ID, LOAD_DATE) WITH LOAD_ID_COL AS (SELECT UUID_STRING() AS LOAD_ID) SELECT f.SERIES, f.TS, f.FORECAST, f.LOWER_BOUND, f.UPPER_BOUND, l.LOAD_ID, CURRENT_DATE() as LOAD_DATE FROM TABLE(%s.%s.%s!FORECAST(FORECASTING_PERIODS => %s)) f CROSS JOIN LOAD_ID_COL l",
+
     var.database_name,
     each.value.schema,
     each.value.forecast_results_table,
@@ -51,11 +65,11 @@ resource "snowflake_task" "copy_task" {
     var.database_name,
     each.value.schema,  
     each.key,
-    each.value.horizon
-
+    each.value.forecasting_periods
   )
 
   started = true
   
   depends_on = [ snowflake_execute.forecast ]
 }
+

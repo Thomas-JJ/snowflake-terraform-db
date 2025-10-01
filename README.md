@@ -274,13 +274,6 @@ terraform init
 terraform apply -var-file="terraform.tfvars"
 ```
 
-### Staging Environment
-```bash
-cd environments/staging
-terraform init
-terraform apply -var-file="terraform.tfvars"
-```
-
 ### Production Environment
 ```bash
 cd environments/prod
@@ -360,16 +353,17 @@ This project creates:
 ```
 .
 ├── environments/
-│   ├── dev/                   # Development environment
-│   ├── staging/               # Staging environment  
+│   ├── dev/                   # Development environment 
 │   └── prod/                  # Production environment
 └── modules/
-    ├── infrastructure/        # Core Snowflake resources
+    ├── infrastructure/       # Core Snowflake resources
     ├── tables/               # Table and schema definitions
-    │   └── sales/            # Sales-specific schemas
     ├── pipelines/            # Pipeline automation
     ├── monitoring/           # Resource monitoring (future)
-    └── security/             # Access control (future)
+    ├── security/             # Access control (future)
+    ├── snowshares/           # Snowshares
+    ├── forecasts/            # ML Forecasts
+    └── views/                # View definitions
 ```
 
 ## Contributing
