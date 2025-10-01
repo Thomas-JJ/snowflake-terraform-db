@@ -244,51 +244,6 @@ tables = {
       }
     }
   }
-sales_forecast_results = {
-    table_name = "SALES_FORECAST_RESULT"
-    schema_name = "ML"
-    add_audit_columns = false
-    add_stage_table = false
-    change_tracking = true
-    fields = {
-      LOCATION = {
-        field_name    = "LOCATION"
-        data_type     = "VARCHAR"
-        nullable      = false
-        primary_key     = true
-      }
-      TIMESTAMP = {
-        field_name    = "TIMESTAMP"
-        data_type     = "DATE"
-        nullable      = false
-        primary_key     = true
-      }
-      PREDICTED = {
-        field_name    = "PREDICTED"
-        data_type     = "FLOAT"
-        nullable      = false
-        primary_key     = false
-      }
-      CI_LOW = {
-        field_name    = "CI_LOW"
-        data_type     = "FLOAT"
-        nullable      = false
-        primary_key     = false
-      }
-      CI_HIGH = {
-        field_name    = "CI_HIGH"
-        data_type     = "FLOAT"
-        nullable      = false
-        primary_key     = false
-      }
-      LOAD_ID = {
-        field_name    = "LOAD_ID"
-        data_type     = "VARCHAR"
-        nullable      = false
-        primary_key     = true
-      }
-    }
-  }
 
 }
 
@@ -356,13 +311,18 @@ forecasts =  {
     schema     = "ML"
     fcast_sql      = "../../modules/forecasts/fcast-sql/SALES_FORECAST.sql"
     
-    view = {
+    historical_view = {
       view_name = "SALES_FOR_FORECAST_V"
       view_sql    = "../../modules/forecasts/view-sql/SALES_FOR_FORECAST_V.sql"
     }
+    future_features_view = {
+      view_name = "SALES_FUTURE_FEATURES_V"
+      view_sql    = "../../modules/forecasts/view-sql/SALES_FUTURE_FEATURES_V.sql"
+    }
+
     warehouse = "COMPUTE_WH"
 
-    horizon = 30
+    forecasting_periods = 30
 
     cron_schedule = "0 6 * * 1 UTC"
     forecast_results_table = "SALES_FORECAST_RESULT"
