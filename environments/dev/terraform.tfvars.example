@@ -17,6 +17,46 @@ db_base_name = "ANALYTICS"
 
 schemas = ["SALES", "MARKETING", "MASTER", "UTILITIES", "SECURE_DETROIT", "SECURE_NASHVILLE", "ML"]
 
+
+warehouses = {
+  compute_wh = {
+    size                              = "XSMALL"
+    auto_suspend                      = 60
+    auto_resume                       = true
+    initially_suspended               = true
+    max_cluster_count                 = 1
+    min_cluster_count                 = 1
+    scaling_policy                    = "ECONOMY"
+    comment                           = "Primary compute warehouse for general workloads"
+    enable_query_acceleration         = false
+    query_acceleration_max_scale_factor = 0
+    
+    credit_limit  = {
+      credit_quota = 10
+      frequency = "MONTHLY"
+    }
+  }
+
+  analytics_wh = {
+    size                              = "XSMALL"
+    auto_suspend                      = 60
+    auto_resume                       = true
+    initially_suspended               = true
+    max_cluster_count                 = 1
+    min_cluster_count                 = 1
+    scaling_policy                    = "ECONOMY"
+    comment                           = "Used for analytics and BI workloads"
+    enable_query_acceleration         = false
+    query_acceleration_max_scale_factor = 0
+    
+    credit_limit  = {
+      credit_quota = 10
+      frequency = "MONTHLY"
+    }
+  }
+}
+
+
 audit_columns = [
   {
     field_name = "CREATED_AT"
@@ -328,3 +368,5 @@ forecasts =  {
     forecast_results_table = "SALES_FORECAST_RESULT"
   }
 }
+
+
