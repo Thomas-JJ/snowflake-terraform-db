@@ -158,12 +158,8 @@ variable "warehouses" {
     auto_suspend                      = number
     auto_resume                       = bool
     initially_suspended               = bool
-    max_cluster_count                 = number
-    min_cluster_count                 = number
-    scaling_policy                    = string
+    
     comment                           = string
-    enable_query_acceleration         = bool
-    query_acceleration_max_scale_factor = number
 
     credit_limit = object({
       credit_quota  = number

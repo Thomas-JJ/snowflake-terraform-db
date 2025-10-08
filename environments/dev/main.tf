@@ -35,8 +35,6 @@ module "tables" {
   depends_on = [module.infrastructure]
 }
 
-
-
 # Pipelines: build stages, tasks, procs, etc.
 module "pipelines" {
   source = "../../modules/pipelines"
@@ -62,6 +60,7 @@ module "dynamic_tables" {
   source = "../../modules/dynamictables"
   database_name = module.infrastructure.database_name
   dynamic_tables = var.dynamic_tables
+  
   depends_on = [module.tables]
 }
 

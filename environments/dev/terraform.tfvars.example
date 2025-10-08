@@ -14,48 +14,7 @@ snowflake_aws_principal_arn  = "arn:aws:iam::principal_arn"
 alert_emails = ["alerts@email.com"]
 
 db_base_name = "ANALYTICS"
-
 schemas = ["SALES", "MARKETING", "MASTER", "UTILITIES", "SECURE_DETROIT", "SECURE_NASHVILLE", "ML"]
-
-
-warehouses = {
-  compute_wh = {
-    size                              = "XSMALL"
-    auto_suspend                      = 60
-    auto_resume                       = true
-    initially_suspended               = true
-    max_cluster_count                 = 1
-    min_cluster_count                 = 1
-    scaling_policy                    = "ECONOMY"
-    comment                           = "Primary compute warehouse for general workloads"
-    enable_query_acceleration         = false
-    query_acceleration_max_scale_factor = 0
-    
-    credit_limit  = {
-      credit_quota = 10
-      frequency = "MONTHLY"
-    }
-  }
-
-  analytics_wh = {
-    size                              = "XSMALL"
-    auto_suspend                      = 60
-    auto_resume                       = true
-    initially_suspended               = true
-    max_cluster_count                 = 1
-    min_cluster_count                 = 1
-    scaling_policy                    = "ECONOMY"
-    comment                           = "Used for analytics and BI workloads"
-    enable_query_acceleration         = false
-    query_acceleration_max_scale_factor = 0
-    
-    credit_limit  = {
-      credit_quota = 10
-      frequency = "MONTHLY"
-    }
-  }
-}
-
 
 audit_columns = [
   {
@@ -284,7 +243,6 @@ tables = {
       }
     }
   }
-
 }
 
 pipelines = {
@@ -313,8 +271,8 @@ dynamic_tables = {
   ORDERS_DAILY = {
     table_name        = "ORDERS_DAILY"
     schema_name       = "SALES"
-    target_lag        = "12 hours"
-    warehouse         = "COMPUTE_WH"
+    target_lag        = "48 hours"
+    warehouse         = "SALESETL_WH"
 
     query             = "../../modules/dynamictables/queries/ORDERS_DAILY.sql"
     initialize        = "ON_CREATE"
@@ -342,7 +300,7 @@ views =  {
 shares =  {
   Detroit   = {
       schema = "SECURE_DETROIT"
-      consumer_accounts = ["organizationid.accountid"]
+      consumer_accounts = ["ZAQBBXK.NK11162"]
   }
 }
 
@@ -360,13 +318,59 @@ forecasts =  {
       view_sql    = "../../modules/forecasts/view-sql/SALES_FUTURE_FEATURES_V.sql"
     }
 
-    warehouse = "COMPUTE_WH"
+    warehouse = "FORECAST_WH"
 
     forecasting_periods = 30
 
     cron_schedule = "0 6 * * 1 UTC"
     forecast_results_table = "SALES_FORECAST_RESULT"
   }
+}
+
+
+
+warehouses = {
+  SALESETL_WH = {
+    size                              = "XSMALL"
+    auto_suspend                      = 60
+    auto_resume                       = true
+    initially_suspended               = true
+
+    comment                           = "Primary compute warehouse for sales etl workloads"
+    
+    credit_limit  = {
+      credit_quota = 2
+      frequency = "MONTHLY"
+    }
+  }
+
+  POWERBI_WH = {
+    size                              = "XSMALL"
+    auto_suspend                      = 60
+    auto_resume                       = true
+    initially_suspended               = true
+
+    comment                           = "Used for powerbi workloads"
+        
+    credit_limit  = {
+      credit_quota = 2
+      frequency = "MONTHLY"
+    }
+  }
+  FORECAST_WH = {
+    size                              = "XSMALL"
+    auto_suspend                      = 60
+    auto_resume                       = true
+    initially_suspended               = true
+
+    comment                           = "Used for forecasting workloads"
+        
+    credit_limit  = {
+      credit_quota = 2
+      frequency = "MONTHLY"
+    }
+  }
+
 }
 
 

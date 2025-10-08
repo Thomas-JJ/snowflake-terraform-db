@@ -22,5 +22,5 @@ provider "snowflake" {
 
     warehouse   = var.snowflake_warehouse
 
-    authenticator = "SNOWFLAKE_JWT"           # <- required for key-pair auth
+    authenticator = "SNOWFLAKE_JWT"
 }
