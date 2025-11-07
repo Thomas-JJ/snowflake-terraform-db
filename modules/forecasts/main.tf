@@ -1,5 +1,5 @@
 
-resource "snowflake_view" "this" {
+resource "snowflake_view" "sales_historical_views" {
   for_each = var.forecasts
 
   database   = var.database_name
@@ -11,7 +11,7 @@ resource "snowflake_view" "this" {
   statement = file(each.value.historical_view.view_sql)
 }
 
-resource "snowflake_view" "that" {
+resource "snowflake_view" "sales_future_features_views" {
   for_each = var.forecasts
 
   database   = var.database_name
@@ -30,14 +30,14 @@ resource "snowflake_execute" "forecast" {
   execute = file(each.value.fcast_sql)
 
   revert = <<SQL
-    DROP FORECAST IF EXISTS ${var.database_name}.${each.value.schema}.${each.key};
+    DROP SNOWFLAKE.ML.FORECAST IF EXISTS ${var.database_name}.${each.value.schema}.${each.key};
   SQL
 
   query = <<SQL
-    SHOW FORECASTS LIKE '${each.key}' IN SCHEMA ${var.database_name}.${each.value.schema};
+    SHOW SNOWFLAKE.ML.FORECAST LIKE '${each.key}' IN SCHEMA ${var.database_name}.${each.value.schema};
   SQL
 
-  depends_on = [ snowflake_view.this ]
+  depends_on = [ snowflake_view.sales_historical_views, snowflake_view.sales_future_features_views ]
 }
 
 resource "snowflake_table" "forecast_results" {
@@ -124,6 +124,6 @@ resource "snowflake_task" "copy_task" {
 
   started = true
   
-  depends_on = [ snowflake_table.forecast_results ]
+  depends_on = [ snowflake_execute.forecast ]
 }
 

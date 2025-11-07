@@ -14,7 +14,7 @@ snowflake_aws_principal_arn  = "arn:aws:iam::principal_arn"
 alert_emails = ["alerts@email.com"]
 
 db_base_name = "ANALYTICS"
-schemas = ["SALES", "MARKETING", "MASTER", "UTILITIES", "SECURE_DETROIT", "SECURE_NASHVILLE", "ML"]
+schemas = ["SALES", "MARKETING", "MASTER", "UTILITIES", "SECURITY", "SECURE_DETROIT", "SECURE_NASHVILLE", "ML", "FINANCE"]
 
 audit_columns = [
   {
@@ -243,6 +243,55 @@ tables = {
       }
     }
   }
+  entity_group_membership = {
+    table_name = "ENTITY_GROUP_MEMBERSHIPS"
+    schema_name = "SECURITY"
+    add_audit_columns = true
+    add_stage_table = false
+    change_tracking = true
+    fields = {
+      PRINCIPAL_TYPE = {
+        field_name    = "PRINCIPAL_TYPE"
+        data_type     = "VARCHAR"
+        nullable      = false
+        primary_key     = true
+      }
+
+      PRINCIPAL_NAME = {
+        field_name    = "PRINCIPAL_NAME"
+        data_type     = "VARCHAR"
+        nullable      = false
+        primary_key     = true
+      }
+      GROUP_NAME = {
+        field_name    = "GROUP_NAME"
+        data_type     = "VARCHAR"
+        nullable      = false
+        primary_key     = true
+      }
+    }
+  }
+entity_group_location = {
+    table_name = "ENTITY_GROUP_LOCATIONS"
+    schema_name = "SECURITY"
+    add_audit_columns = true
+    add_stage_table = false
+    change_tracking = true
+    fields = {
+      GROUP_NAME = {
+        field_name    = "GROUP_NAME"
+        data_type     = "VARCHAR"
+        nullable      = false
+        primary_key     = true
+      }
+      STORE_ID = {
+        field_name    = "STORE_ID"
+        data_type     = "VARCHAR"
+        nullable      = false
+        primary_key     = true
+      }
+    }
+  }
 }
 
 pipelines = {
@@ -295,6 +344,12 @@ views =  {
     is_secure  = true
     query      = "../../modules/views/queries/ORDERS_V_NASHVILLE.sql"
   }
+  V_ORDERS = {
+    schema     = "SALES"
+    name       = "V_ORDERS"
+    is_secure  = true
+    query      = "../../modules/views/queries/V_ORDERS.sql"
+  }
 }
 
 shares =  {
@@ -326,8 +381,6 @@ forecasts =  {
     forecast_results_table = "SALES_FORECAST_RESULT"
   }
 }
-
-
 
 warehouses = {
   SALESETL_WH = {
@@ -370,7 +423,43 @@ warehouses = {
       frequency = "MONTHLY"
     }
   }
+  FINANCE_WH = {
+    size                              = "XSMALL"
+    auto_suspend                      = 60
+    auto_resume                       = true
+    initially_suspended               = true
 
+    comment                           = "Used for forecasting workloads"
+        
+    credit_limit  = {
+      credit_quota = 2
+      frequency = "MONTHLY"
+    }
+  }
 }
+
+
+role_access = {
+  FINANCE_ANALYST = {
+    warehouses = "FINANCE_WH"
+    schemas = {
+      FINANCE = ["USAGE", "SELECT"]
+      SALES = ["USAGE", "SELECT"]
+    }
+    views_only = true
+  }
+
+  DATA_ENGINEER = {
+    warehouses = "SALESETL_WH"
+    schemas = {
+      FINANCE   = ["USAGE", "SELECT", "INSERT"]
+      SALES = ["USAGE", "SELECT", "INSERT"]
+      ML = ["USAGE", "SELECT"]
+      MARKETING = ["USAGE", "SELECT"]
+    }
+    views_only = false
+  }
+}
+
 
 

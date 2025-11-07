@@ -168,3 +168,12 @@ variable "warehouses" {
 
   }))
 }
+
+variable "role_access" {
+  description = "Map of roles with warehouse and schema-level access"
+  type = map(object({
+    warehouses = string
+    schemas    = map(list(string)) # schema_name => [privileges]
+    views_only  = optional(bool, true)
+  }))
+}

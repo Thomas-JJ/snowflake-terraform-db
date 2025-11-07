@@ -12,7 +12,7 @@
 
 
   # Use formatdate to ensure correct format
-  current_timestamp = formatdate("YYYY-MM-DD hh:mm", timeadd(timestamp(), "1m"))
+  current_timestamp = formatdate("YYYY-MM-DD hh:mm", timeadd(timestamp(), "2m"))
 
 }
 

@@ -4,7 +4,7 @@ WITH calendar AS (
 ),
 locations AS (
     SELECT DISTINCT LOCATION
-    FROM FGANALYTICS_DEV.SALES.ORDERS
+    FROM SALES.ORDERS
 ),
 calendar_by_loc AS (
     SELECT c.DATE, l.LOCATION

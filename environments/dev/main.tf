@@ -86,3 +86,9 @@ module "forecasts" {
   forecasts = var.forecasts
   depends_on = [module.views]
 }
+module "security" {
+  source = "../../modules/security"
+  environment   =   var.environment
+  database_name =   module.infrastructure.database_name
+  role_access   =   var.role_access
+}
